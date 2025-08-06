@@ -1,5 +1,7 @@
 name = "woofyworkers-proxy"
 main = "index.js"
 compatibility_date = "2024-08-02"
+
 [vars]
 GSCRIPT_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbygOvUK4Wd8feJ1_4HBnkfijRnad_tk-uhou2wNIMEKOMy7yrVsP_B4KfIU9GBYidXX/exec"
+GSCRIPT_GET_URL = "https://script.google.com/macros/s/AKfycbygOvUK4Wd8feJ1_4HBnkfijRnad_tk-uhou2wNIMEKOMy7yrVsP_B4KfIU9GBYidXX/exec?type=enquiry"
