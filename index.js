@@ -1,6 +1,5 @@
 export default {
   async fetch(request, env, ctx) {
-    // Handle preflight CORS
     if (request.method === "OPTIONS") {
       return new Response(null, {
         headers: {
@@ -11,12 +10,23 @@ export default {
       });
     }
 
-    // Proxy GET to Google Apps Script for "Enquiry" data
+    const url = new URL(request.url);
+    const pathname = url.pathname;
+
+    // Handle GET requests
     if (request.method === "GET") {
-      const gscriptGetURL = env.GSCRIPT_GET_URL; // Store your GET endpoint in your environment variable
-      const resp = await fetch(gscriptGetURL, {
-        method: "GET",
-      });
+      let targetUrl;
+      if (pathname.endsWith("/enquiryAll")) {
+        // Return all enquiries (no grouping)
+        targetUrl = env.GSCRIPT_ENQUIRY_URL;
+      } else if (pathname.endsWith("/enquiryByCustomer")) {
+        // Return grouped by customer
+        targetUrl = env.GSCRIPT_ENQUIRY_URL + "?groupby=customer";
+      } else {
+        return new Response("Not found", { status: 404 });
+      }
+
+      const resp = await fetch(targetUrl, { method: "GET" });
       const result = await resp.text();
       return new Response(result, {
         headers: {
@@ -26,11 +36,10 @@ export default {
       });
     }
 
-    // Proxy POST to Google Apps Script webhook
-    if (request.method === "POST") {
-      const gscriptURL = env.GSCRIPT_WEBHOOK_URL;
+    // Proxy POST for new enquiries
+    if (request.method === "POST" && pathname.endsWith("/enquiryAll")) {
       const body = await request.text();
-      const resp = await fetch(gscriptURL, {
+      const resp = await fetch(env.GSCRIPT_ENQUIRY_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body,
