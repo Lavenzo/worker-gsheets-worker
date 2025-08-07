@@ -17,11 +17,14 @@ export default {
     if (request.method === "GET") {
       let targetUrl;
       if (pathname.endsWith("/enquiryAll")) {
-        // Return all enquiries (no grouping)
         targetUrl = env.GSCRIPT_ENQUIRY_URL;
       } else if (pathname.endsWith("/enquiryByCustomer")) {
-        // Return grouped by customer
         targetUrl = env.GSCRIPT_ENQUIRY_URL + "?groupby=customer";
+      } else if (pathname.endsWith("/purchaseAll")) {
+        targetUrl = env.GSCRIPT_PURCHASE_URL + "?type=purchase";
+      } else if (pathname.endsWith("/purchaseByCustomer")) {
+        targetUrl =
+          env.GSCRIPT_PURCHASE_URL + "?type=purchase&groupby=customer";
       } else {
         return new Response("Not found", { status: 404 });
       }
@@ -40,6 +43,23 @@ export default {
     if (request.method === "POST" && pathname.endsWith("/enquiryAll")) {
       const body = await request.text();
       const resp = await fetch(env.GSCRIPT_ENQUIRY_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body,
+      });
+      const result = await resp.text();
+      return new Response(result, {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json",
+        },
+      });
+    }
+
+    // Proxy POST for new purchases (optional, if you want to support it)
+    if (request.method === "POST" && pathname.endsWith("/purchaseAll")) {
+      const body = await request.text();
+      const resp = await fetch(env.GSCRIPT_PURCHASE_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body,
